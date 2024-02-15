@@ -21,7 +21,7 @@ class DataIngestion:
         logging.info("Entered the data ingestion")
         try:
             # Read the dataset
-            df = pd.read_csv('data/BTC-USD-2014.csv')            
+            df = pd.read_csv('data to add')            
             logging.info('Read csv data')
             
             os.makedirs(os.path.dirname(self.ingestion_config.raw_data_path), exist_ok=True)
@@ -36,3 +36,10 @@ class DataIngestion:
             
         except Exception as e:
             raise CustomException(e, sys)
+        
+if __name__=="__main__":
+    obj=DataIngestion()
+    raw_data = obj.initiate_data_ingestion()
+    data_transformation=DataTransformation()
+    train_data, test_data = data_transformation.transform_data(raw_data)
+    
