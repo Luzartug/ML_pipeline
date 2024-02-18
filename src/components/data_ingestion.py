@@ -21,7 +21,7 @@ class DataIngestion:
         logging.info("Entered the data ingestion")
         try:
             # Read the dataset
-            df = pd.read_csv('data to add')            
+            df = pd.read_csv('data/AmesHousing.csv')            
             logging.info('Read csv data')
             
             os.makedirs(os.path.dirname(self.ingestion_config.raw_data_path), exist_ok=True)
