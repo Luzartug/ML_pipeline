@@ -38,8 +38,6 @@ class ModelTrainer:
             
             models= {
                 "Random Forest": RandomForestClassifier(),
-                "Gradient Boosting": GradientBoostingClassifier(),
-                "Ada Boost": AdaBoostClassifier(),
                 "SVC": SVC()
             }
             params={
@@ -51,21 +49,8 @@ class ModelTrainer:
                     # 'min_samples_leaf': [1, 2, 4],  # Minimum number of samples required at each leaf node
                     # 'bootstrap': [True, False]  # Method of selecting samples for training each tree
                 },
-                "Gradient Boosting": {
-                    'n_estimators': [100]  # Number of boosting stages to be run
-                    # 'learning_rate': [0.01, 0.1, 0.2],  # Learning rate shrinks the contribution of each tree
-                    # 'max_depth': [3, 5, 7],  # Maximum depth of the individual regression estimators
-                    # 'min_samples_split': [2, 4, 6],  # Minimum number of samples required to split a node
-                    # 'min_samples_leaf': [1, 2, 4],  # Minimum number of samples required at each leaf node
-                    # 'subsample': [0.8, 0.9, 1.0]  # Fraction of samples to be used for fitting the individual base learners
-                },
-                "Ada Boost": {
-                    'n_estimators': [50]  # Maximum number of estimators at which boosting is terminated
-                    # 'learning_rate': [0.01, 0.1, 1.0],  # Weight applied to each classifier at each boosting iteration
-                    # 'algorithm': ['SAMME', 'SAMME.R']  # Algorithm to use
-                },
                 "SVC": {
-                    'C': [0.1]  # Regularization parameter
+                    'C': [0.5]  # Regularization parameter
                     # 'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],  # Specifies the kernel type to be used in the algorithm
                     # 'gamma': ['scale', 'auto'],  # Kernel coefficient
                     # 'degree': [2, 3, 4]  # Degree of the polynomial kernel function (‘poly’)
@@ -91,6 +76,7 @@ class ModelTrainer:
                 file_path=self.model_trainer_config.trained_model_file_path,
                 obj=best_model
             )
+            logging.info("Model sucessfully loaded")
             
             predicted=best_model.predict(X_test)
             score_f1 = f1_score(y_test, predicted, average='weighted')

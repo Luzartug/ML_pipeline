@@ -3,7 +3,6 @@ import os
 import json
 import requests
 import sklearn
-st.write(sklearn.__version__)
 import pandas as pd
 from dotenv import load_dotenv
 load_dotenv()
@@ -38,6 +37,5 @@ def main():
         inference_pipeline= InferencePipeline()
         st.write(inference_pipeline.inference(df_features))
         
-    
 if __name__ == "__main__":
     main()

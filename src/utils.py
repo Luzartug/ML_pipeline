@@ -10,14 +10,18 @@ from sklearn.model_selection import GridSearchCV
 from src.exception import CustomException
 
 # Preprocess the function
-def preprocess_data(df):
+def preprocess_data(df, scaler=None):
     # Normalize the pollutant columns (except 'aqi') using MinMaxScaler
     pollutants = ['co', 'no', 'no2', 'o3', 'so2', 'pm2_5', 'pm10', 'nh3']
-    scaler = MinMaxScaler()
-    for pollutant in pollutants:
-        df[pollutant] = scaler.fit_transform(df[[pollutant]])  # No need to reshape as we are using DataFrame slicing
-
-    return df
+    
+    # If a scaler is not provided, initialize one
+    if scaler is None:
+        scaler = MinMaxScaler()
+        # Fit the scaler on the data and transform the data
+        df[pollutants] = scaler.fit_transform(df[pollutants])
+        return df, scaler
+    else:
+        return scaler.transform(df)
 
 def evaluate_models(X_train, y_train, X_test, y_test, models, param):
     try:

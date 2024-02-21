@@ -9,12 +9,15 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
+from src.utils import save_object
+
 from dataclasses import dataclass
 
 @dataclass
 class DataTransformationConfig:
     train_data_path: str=os.path.join('data', 'curated', 'train.csv')
     test_data_path: str=os.path.join('data', 'curated', 'test.csv')
+    scaler_file_path: str=os.path.join("data", "scaler.pkl")
     
 class DataTransformation:
     def __init__(self):
@@ -32,7 +35,14 @@ class DataTransformation:
             
             os.makedirs(os.path.dirname(self.transformation_config.train_data_path), exist_ok=True)
         
-            df = preprocess_data(df)
+            df, scaler = preprocess_data(df)
+            
+            # Save scaler
+            save_object(
+                file_path=self.transformation_config.scaler_file_path,
+                obj=scaler
+            )
+            logging.info('Scaler sucessfully loaded')
             
             train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
             logging.info("Train/test split")

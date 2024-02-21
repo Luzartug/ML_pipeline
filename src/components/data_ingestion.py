@@ -22,7 +22,7 @@ class DataIngestion:
         logging.info("Entered the data ingestion")
         try:
             # Read the dataset - use API
-            df = pd.read_csv('data/data.csv')            
+            df = pd.read_csv('data/data.csv', index_col=0)
             logging.info('Read csv data')
             
             os.makedirs(os.path.dirname(self.ingestion_config.raw_data_path), exist_ok=True)
@@ -37,13 +37,3 @@ class DataIngestion:
             
         except Exception as e:
             raise CustomException(e, sys)
-        
-# if __name__=="__main__":
-#     obj=DataIngestion()
-#     raw_data = obj.initiate_data_ingestion()
-#     data_transformation=DataTransformation()
-#     train_path, test_path = data_transformation.transform_data(raw_data)
-#     model_trainer=ModelTrainer()
-#     f1_score=model_trainer.initiate_model_trainer(train_path=train_path, test_path=test_path)
-#     print(f1_score)
-    
