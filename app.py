@@ -4,12 +4,11 @@ import json
 import requests
 import sklearn
 import pandas as pd
-from dotenv import load_dotenv
-load_dotenv()
+
 
 from src.pipeline.inference_pipeline import InferencePipeline
 
-openweathermap_key = os.getenv('OPEN_WEATHER_MAP_KEY')
+openweathermap_key = '49066f72f11e4c84772f0190b706335c'
 
 def extract_current(latitude, longitude):
     getUrl = 'https://api.openweathermap.org/data/2.5/air_pollution'
