@@ -8,6 +8,7 @@ import numpy as np
 from dataclasses import dataclass
 
 from src.components.data_transformation import DataTransformation
+from src.components.model_trainer import ModelTrainer
 
 @dataclass
 class DataIngestionConfig:
@@ -20,8 +21,13 @@ class DataIngestion:
     def initiate_data_ingestion(self):
         logging.info("Entered the data ingestion")
         try:
+<<<<<<< HEAD
             # Read the dataset
             df = pd.read_csv('data/AmesHousing.csv')            
+=======
+            # Read the dataset - use API
+            df = pd.read_csv('data/data.csv', index_col=0)
+>>>>>>> main
             logging.info('Read csv data')
             
             os.makedirs(os.path.dirname(self.ingestion_config.raw_data_path), exist_ok=True)
@@ -36,10 +42,3 @@ class DataIngestion:
             
         except Exception as e:
             raise CustomException(e, sys)
-        
-if __name__=="__main__":
-    obj=DataIngestion()
-    raw_data = obj.initiate_data_ingestion()
-    data_transformation=DataTransformation()
-    train_data, test_data = data_transformation.transform_data(raw_data)
-    
