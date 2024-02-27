@@ -1,5 +1,6 @@
 import os
 import sys
+import mlflow
 from src.exception import CustomException
 from src.logger import logging
 from dataclasses import dataclass
@@ -21,66 +22,76 @@ class ModelTrainerConfig:
 class ModelTrainer:
     def __init__(self):
         self.model_trainer_config = ModelTrainerConfig()
-        
+        mlflow.set_experiment("Model_Training")
+    
     def initiate_model_trainer(self, train_path, test_path):
-        try:
-            train_set = pd.read_csv(train_path)
-            test_set = pd.read_csv(test_path)
-            logging.info("Read Data")
-            
-            X_train, X_test, y_train, y_test =(
-                train_set[["co", "no", "no2", "o3", "so2", "pm2_5", "pm10", "nh3"]],
-                test_set[["co", "no", "no2", "o3", "so2", "pm2_5", "pm10", "nh3"]],
-                train_set['aqi'],
-                test_set[['aqi']]
-            )
-            logging.info("Split training and test input data")
-            
-            models= {
-                "Random Forest": RandomForestClassifier(),
-                "SVC": SVC()
-            }
-            params={
-                "Random Forest": {
-                    'n_estimators': [100]  # Number of trees in the forest
-                    # 'max_features': ['auto', 'sqrt'],  # Number of features to consider at every split
-                    # 'max_depth': [10, 20, 30, None],  # Maximum number of levels in tree
-                    # 'min_samples_split': [2, 5, 10],  # Minimum number of samples required to split a node
-                    # 'min_samples_leaf': [1, 2, 4],  # Minimum number of samples required at each leaf node
-                    # 'bootstrap': [True, False]  # Method of selecting samples for training each tree
-                },
-                "SVC": {
-                    'C': [0.5]  # Regularization parameter
-                    # 'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],  # Specifies the kernel type to be used in the algorithm
-                    # 'gamma': ['scale', 'auto'],  # Kernel coefficient
-                    # 'degree': [2, 3, 4]  # Degree of the polynomial kernel function (‘poly’)
+        with mlflow.start_run(run_name="Model_Training_Run"):
+            try:
+                train_set = pd.read_csv(train_path)
+                test_set = pd.read_csv(test_path)
+                logging.info("Read Data")
+                
+                X_train, X_test, y_train, y_test =(
+                    train_set[["co", "no", "no2", "o3", "so2", "pm2_5", "pm10", "nh3"]],
+                    test_set[["co", "no", "no2", "o3", "so2", "pm2_5", "pm10", "nh3"]],
+                    train_set['aqi'],
+                    test_set[['aqi']]
+                )
+                logging.info("Split training and test input data")
+                
+                models= {
+                    "Random Forest": RandomForestClassifier(),
+                    "SVC": SVC()
                 }
-            }
+                params={
+                    "Random Forest": {
+                        'n_estimators': [100]  # Number of trees in the forest
+                        # 'max_features': ['auto', 'sqrt'],  # Number of features to consider at every split
+                        # 'max_depth': [10, 20, 30, None],  # Maximum number of levels in tree
+                        # 'min_samples_split': [2, 5, 10],  # Minimum number of samples required to split a node
+                        # 'min_samples_leaf': [1, 2, 4],  # Minimum number of samples required at each leaf node
+                        # 'bootstrap': [True, False]  # Method of selecting samples for training each tree
+                    },
+                    "SVC": {
+                        'C': [0.5]  # Regularization parameter
+                        # 'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],  # Specifies the kernel type to be used in the algorithm
+                        # 'gamma': ['scale', 'auto'],  # Kernel coefficient
+                        # 'degree': [2, 3, 4]  # Degree of the polynomial kernel function (‘poly’)
+                    }
+                }
+                
+                model_report:dict=evaluate_models(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, models=models, param=params)
+                
+                # Get best model f1 scores from dict
+                best_model_score = max(sorted(model_report.values()))
+                
+                # Get best model name from dict
+                best_model_name = list(model_report.keys())[
+                    list(model_report.values()).index(best_model_score)
+                ]
+                best_model = models[best_model_name]
+                
+                if best_model_score<0.95:
+                    raise CustomException("No best model found")
+                logging.info("Best model found on train & test dataset")
+                
+                # Log model and parameters
+                mlflow.sklearn.log_model(best_model, "model")
+                mlflow.log_params(best_model.get_params())
+                
+                save_object(
+                    file_path=self.model_trainer_config.trained_model_file_path,
+                    obj=best_model
+                )
+                logging.info("Model sucessfully loaded")
+                
+                predicted=best_model.predict(X_test)
+                score_f1 = f1_score(y_test, predicted, average='weighted')
+                
+                # Log metrics
+                mlflow.log_metric("f1_score", score_f1)
+                
+                return score_f1, best_model_name
             
-            model_report:dict=evaluate_models(X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, models=models, param=params)
-            
-            # Get best model f1 scores from dict
-            best_model_score = max(sorted(model_report.values()))
-            
-            # Get best model name from dict
-            best_model_name = list(model_report.keys())[
-                list(model_report.values()).index(best_model_score)
-            ]
-            best_model = models[best_model_name]
-            
-            if best_model_score<0.95:
-                raise CustomException("No best model found")
-            logging.info("Best model found on train & test dataset")
-            
-            save_object(
-                file_path=self.model_trainer_config.trained_model_file_path,
-                obj=best_model
-            )
-            logging.info("Model sucessfully loaded")
-            
-            predicted=best_model.predict(X_test)
-            score_f1 = f1_score(y_test, predicted, average='weighted')
-            return score_f1, best_model_name
-        
-        except Exception as e:
-            raise CustomException(e, sys)
+            except Exception as e:
+                raise CustomException(e, sys)
