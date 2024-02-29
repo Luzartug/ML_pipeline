@@ -8,4 +8,6 @@ datetime
 python-dotenv
 streamlit
 mlflow
+requests
+scipy
 #-e .

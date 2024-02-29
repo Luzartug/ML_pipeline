@@ -6,6 +6,7 @@ from src.utils import preprocess_data
 
 import pandas as pd
 import numpy as np
+import mlflow
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
@@ -22,41 +23,47 @@ class DataTransformationConfig:
 class DataTransformation:
     def __init__(self):
         self.transformation_config=DataTransformationConfig()
+        mlflow.set_experiment("Data_Transformation")
         
     def transform_data(self, raw_path):
         '''
         This function is responsible for data transformation
         '''
+        
         logging.info("Entered the data transformation")
-        try:
-            # transformation of the data
-            df = pd.read_csv('data/raw/raw.csv')            
-            logging.info('Read csv data')
+        with mlflow.start_run(run_name="Data_Transformation_Run"):
+            try:
+                # transformation of the data
+                df = pd.read_csv('data/raw/raw.csv')            
+                logging.info('Read csv data')
+                
+                os.makedirs(os.path.dirname(self.transformation_config.train_data_path), exist_ok=True)
             
-            os.makedirs(os.path.dirname(self.transformation_config.train_data_path), exist_ok=True)
-        
-            df, scaler = preprocess_data(df)
-            
-            # Save scaler
-            save_object(
-                file_path=self.transformation_config.scaler_file_path,
-                obj=scaler
-            )
-            logging.info('Scaler sucessfully loaded')
-            
-            train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
-            logging.info("Train/test split")
-            
-            train_set.to_csv(self.transformation_config.train_data_path)
-            test_set.to_csv(self.transformation_config.test_data_path)
-            logging.info("Train/Test csv created in ")
-            
-            return(
-                self.transformation_config.train_data_path,
-                self.transformation_config.test_data_path
-            )
-            
-        except Exception as e:
-            raise CustomException(e,sys)
-        
-     
+                df, scaler = preprocess_data(df)
+                
+                # Save scaler
+                save_object(
+                    file_path=self.transformation_config.scaler_file_path,
+                    obj=scaler
+                )
+                logging.info('Scaler sucessfully loaded')
+                
+                train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
+                logging.info("Train/test split")
+                
+                train_set.to_csv(self.transformation_config.train_data_path)
+                test_set.to_csv(self.transformation_config.test_data_path)
+                
+                # Log transformed data paths
+                mlflow.log_artifact(self.transformation_config.train_data_path, "curated_data")
+                mlflow.log_artifact(self.transformation_config.test_data_path, "curated_data")
+                
+                logging.info("Train/Test csv created & logged")
+                
+                return(
+                    self.transformation_config.train_data_path,
+                    self.transformation_config.test_data_path
+                )
+                
+            except Exception as e:
+                raise CustomException(e,sys)
