@@ -1,0 +1,17 @@
+notebook
+mlproject.egg-info
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
