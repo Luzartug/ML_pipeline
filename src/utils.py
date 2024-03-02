@@ -11,17 +11,21 @@ from src.exception import CustomException
 
 # Preprocess the function
 def preprocess_data(df, scaler=None):
-    # Normalize the pollutant columns (except 'aqi') using MinMaxScaler
-    pollutants = ['co', 'no', 'no2', 'o3', 'so2', 'pm2_5', 'pm10', 'nh3']
+    try:
+        # Normalize the pollutant columns (except 'aqi') using MinMaxScaler
+        pollutants = ['co', 'no', 'no2', 'o3', 'so2', 'pm2_5', 'pm10', 'nh3']
+        
+        # If a scaler is not provided, initialize one
+        if scaler is None:
+            scaler = MinMaxScaler()
+            # Fit the scaler on the data and transform the data
+            df[pollutants] = scaler.fit_transform(df[pollutants])
+            return df, scaler
+        else:
+            return scaler.transform(df)
     
-    # If a scaler is not provided, initialize one
-    if scaler is None:
-        scaler = MinMaxScaler()
-        # Fit the scaler on the data and transform the data
-        df[pollutants] = scaler.fit_transform(df[pollutants])
-        return df, scaler
-    else:
-        return scaler.transform(df)
+    except Exception as e:
+        raise CustomException(e, sys)
 
 def evaluate_models(X_train, y_train, X_test, y_test, models, param):
     try:
@@ -48,7 +52,8 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
             report[list(models.keys())[i]] = test_model_score
         
         return report
-    except:
+    
+    except Exception as e:
         raise CustomException(e, sys)
 
 def save_object(file_path, obj):
@@ -67,5 +72,6 @@ def load_object(file_path):
     try:
         with open(file_path,"rb") as file_obj:
             return pickle.load(file_obj)
+    
     except Exception as e:
         raise CustomException(e, sys)
