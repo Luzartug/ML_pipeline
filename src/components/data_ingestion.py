@@ -23,8 +23,8 @@ class DataIngestionConfig:
     openweathermap_key:str = os.getenv('OPEN_WEATHER_MAP_KEY')
     
 class DataIngestion:
-    def __init__(self):
-        self.ingestion_config=DataIngestionConfig()
+    def __init__(self, config=None):
+        self.ingestion_config=config if config is not None else DataIngestionConfig()
         mlflow.set_experiment("Data_Ingestion")
     
     def fetch_air_pollution_data(self):
