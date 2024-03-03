@@ -1,7 +1,8 @@
 import pytest
 import requests_mock
 import json
-from src.components.data_ingestion import DataIngestion, DataIngestionConfig
+import os
+from src.components.data_ingestion import DataIngestion
 
 @pytest.fixture
 def mock_response():
@@ -27,7 +28,7 @@ def mock_response():
         ]
     }
 
-def test_data_ingestion_creates_csv_file(tmp_path, mock_response):
+def test_data_ingestion_creates_csv_file( mock_response):
     # Setup the mock for requests.get
     with requests_mock.Mocker() as m:
         m.get("https://api.openweathermap.org/data/2.5/air_pollution/history", json=mock_response)
@@ -35,12 +36,8 @@ def test_data_ingestion_creates_csv_file(tmp_path, mock_response):
         # Mocking the environment variable for OPEN_WEATHER_MAP_KEY
         # monkeypatch.setenv('OPEN_WEATHER_MAP_KEY', 'fake_api_key')
 
-        # Setting a temporary directory for the raw data path
-        temp_raw_data_path = tmp_path / "raw_test" / "raw.csv"
-        ingestion_config = DataIngestionConfig(raw_data_path=str(temp_raw_data_path))
-
         # # Instantiating DataIngestion with the temporary config
-        data_ingestion = DataIngestion(config=ingestion_config)
+        data_ingestion = DataIngestion()
 
         # Running the data ingestion process
         data_ingestion = DataIngestion()

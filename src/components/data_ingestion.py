@@ -23,8 +23,8 @@ class DataIngestionConfig:
     openweathermap_key:str = os.getenv('OPEN_WEATHER_MAP_KEY')
     
 class DataIngestion:
-    def __init__(self, config=None):
-        self.ingestion_config=config if config is not None else DataIngestionConfig()
+    def __init__(self):
+        self.ingestion_config= DataIngestionConfig()
         mlflow.set_experiment("Data_Ingestion")
     
     def fetch_air_pollution_data(self):
@@ -85,14 +85,14 @@ if __name__ == "__main__":
     data_ingestion = DataIngestion()
     raw_data = data_ingestion.initiate_data_ingestion()
     
-    data_quality_instance = DataQuality(raw_data)
-    processed_data_path = data_quality_instance.initiate_data_quality_checks()
-    print(processed_data_path)
+    # data_quality_instance = DataQuality(raw_data)
+    # processed_data_path = data_quality_instance.initiate_data_quality_checks()
+    # print(processed_data_path)
     
-    data_trans = DataTransformation()
-    train_set, test_set = data_trans.transform_data(processed_data_path)
-    print(train_set, '\n',test_set)
+    # data_trans = DataTransformation()
+    # train_set, test_set = data_trans.transform_data(processed_data_path)
+    # print(train_set, '\n',test_set)
     
-    model=ModelTrainer()
-    score_f1, best_model_name=model.initiate_model_trainer(train_set, test_set)
-    print(score_f1, best_model_name)
+    # model=ModelTrainer()
+    # score_f1, best_model_name=model.initiate_model_trainer(train_set, test_set)
+    # print(score_f1, best_model_name)
