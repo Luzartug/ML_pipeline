@@ -1,4 +1,4 @@
-name: CI/CD
+name: ci/cd
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
           python -m pytest
 
   Docker:
-    needs: build
+    needs: Test
     runs-on: ubuntu-latest
     steps:
       - name: Login to Docker Hub
