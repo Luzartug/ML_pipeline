@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.pipeline.inference_pipeline import InferencePipeline
+from src.pipeline.train_pipeline import TrainingPipeline
+from src.pipeline.data_pipeline import DataPipeline
 
 openweathermap_key = os.getenv('OPEN_WEATHER_MAP_KEY')
 
@@ -36,6 +38,14 @@ def main():
         st.dataframe(df_features)
         inference_pipeline= InferencePipeline()
         st.write(inference_pipeline.inference(df_features))
+
+    if st.button('Train Pipeline'):
+        data_pipeline=DataPipeline()
+        train_path, test_path = data_pipeline.data()
+        
+        training_pipeline=TrainingPipeline()
+        training_pipeline.training(train_path, test_path)
+        st.write("Pipeline trained successfully")
         
 if __name__ == "__main__":
     main()
